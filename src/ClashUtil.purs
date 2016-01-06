@@ -84,6 +84,9 @@ playerDir (PlayerState player) = player.direction
 playerPos :: PlayerState -> Position
 playerPos (PlayerState player) = player.position
 
+playerNextPos :: PlayerState -> Position
+playerNextPos player = nextPos (playerDir player) (playerPos player)
+
 pointingAtPos :: Direction -> Position -> Position -> Boolean
 pointingAtPos predDir predPosition preyPosition =  ( predDir == North && positionIsNorth preyPosition predPosition && posSameCol preyPosition predPosition )
                                                 || ( predDir == East  && positionIsEast  preyPosition predPosition && posSameRow preyPosition predPosition )
