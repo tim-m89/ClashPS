@@ -29,27 +29,27 @@ myAi self enemies game = if hasAmmo self && pointingAtPlayers self enemies
                           else myNoShootMove self enemies game
 
 myNoShootMove :: Ai
-myNoShootMove self enemies game = case turnToInlineEnemies self enemies game of
+myNoShootMove self enemies game = case turnToInlineEnemiesCurrent self enemies game of
                                     (Just m)  -> m
-                                    (Nothing) -> case turnToImminentInlineEnemies self enemies game of
+                                    (Nothing) -> case turnToInlineEnemiesImminent self enemies game of
                                       (Just m)  -> m
                                       (Nothing) -> seekAmmo self enemies game
 
-turnToInlineEnemies :: PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
-turnToInlineEnemies self enemies game = if not (hasAmmo self)
+turnToInlineEnemies :: (PlayerState -> Position) -> PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
+turnToInlineEnemies fPlayerPos self enemies game = if not (hasAmmo self)
                                           then Nothing
                                           else let myPos      = playerPos self
-                                                   enemiesPos = map playerPos enemies
+                                                   enemiesPos = map fPlayerPos enemies
                                                    inline     = filter (\pos-> posInline myPos pos) enemiesPos
                                                     in head inline >>= \pos-> return $ turnRouteForPos self pos
 
-turnToImminentInlineEnemies :: PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
-turnToImminentInlineEnemies self enemies game = if not (hasAmmo self)
-                                                  then Nothing
-                                                  else let myPos          = playerPos self
-                                                           enemiesNextPos = map playerNextPos enemies
-                                                           imminentInline = filter (\pos-> posInline myPos pos) enemiesNextPos
-                                                            in head imminentInline >>= \pos-> return $ turnRouteForPos self pos
+-- Turn to enemies that are currently inline with self
+turnToInlineEnemiesCurrent :: PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
+turnToInlineEnemiesCurrent = turnToInlineEnemies playerPos
+
+-- Turn to where an enemy is about to be inline if they are to go straight ahead on their next move
+turnToInlineEnemiesImminent :: PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
+turnToInlineEnemiesImminent = turnToInlineEnemies playerNextPos
 
 seekAmmo :: Ai
 seekAmmo self enemies game = case closestPos (playerPos self) (ammoPos game) of
