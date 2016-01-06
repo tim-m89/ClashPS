@@ -31,7 +31,9 @@ myAi self enemies game = if hasAmmo self && pointingAtPlayers self enemies
 myNoShootMove :: Ai
 myNoShootMove self enemies game = case turnToInLineEnemies self enemies game of
                                     (Just m)  -> m
-                                    (Nothing) -> seekAmmo self enemies game
+                                    (Nothing) -> case turnToImminentInLineEnemies self enemies game of
+                                      (Just m)  -> m
+                                      (Nothing) -> seekAmmo self enemies game
 
 turnToInLineEnemies :: PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
 turnToInLineEnemies self enemies game = if not (hasAmmo self)
@@ -39,6 +41,14 @@ turnToInLineEnemies self enemies game = if not (hasAmmo self)
                                           else let myPos         = playerPos self
                                                    playersInline = filter (\player-> posInline myPos $ playerPos player) enemies
                                                     in head playersInline >>= \enemy-> return $ turnRouteForPos self (playerPos enemy)
+
+turnToImminentInLineEnemies :: PlayerState -> EnemiesState -> GameEnvironment -> Maybe Move
+turnToImminentInLineEnemies self enemies game = if not (hasAmmo self)
+                                                  then Nothing
+                                                  else let myPos          = playerPos self
+                                                           enemiesNextPos = map (\player-> nextPos (playerDir player) (playerPos player)) enemies
+                                                           imminentInline = filter (\pos-> posInline myPos pos) enemiesNextPos
+                                                            in head imminentInline >>= \pos-> return $ turnRouteForPos self pos
 
 seekAmmo :: Ai
 seekAmmo self enemies game = case closestPos (playerPos self) (ammoPos game) of
