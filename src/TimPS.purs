@@ -59,7 +59,7 @@ turnToInlineEnemiesImminent = turnToInlineEnemies playerNextPos
 
 -- Move forward if it will get the ship closer to the closest ammo, otherwise turn if reguired for a move to the closest ammo, otherwise noop
 seekAmmo :: AiMaybe
-seekAmmo self enemies game = closestPos (playerPos self) (ammoPos game) >>= \pos-> return $ moveToPos pos self enemies game
+seekAmmo self enemies game = closestNonEqualPos (playerPos self) (ammoPos game) >>= \pos-> return $ moveToPos pos self enemies game
 
 -- Attemp to go forward if it will get us closer to supplied position, otherwise turn for it
 moveToPos :: Position -> Ai
